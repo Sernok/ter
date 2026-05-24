@@ -298,7 +298,7 @@
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
- <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 emailjs.init('8KPENbHiyHjeOZQU');
 
@@ -338,33 +338,25 @@ function placeOrder() {
   placeBtn.disabled = true;
   placeBtn.textContent = 'Отправляем...';
 
-  const templateParams = {
+  // Упрощённый вариант — только основные переменные
+  emailjs.send('service_i4q84st', 'template_ga0qo5w', {
     from_name: formData.get('from_name'),
     from_email: formData.get('from_email'),
-    phone: formData.get('phone') || 'Не указан',
-    address: formData.get('address') || 'Не указан',
-    message: orderDetails,
-    total: total,
-    site_name: 'Мой Магазин',
-    date: new Date().toLocaleString('ru-RU')
-  };
-
-  console.log("Отправляем данные:", templateParams); // Для отладки
-
-  emailjs.send('service_i4q84st', 'template_ga0qo5w', templateParams)
-    .then(() => {
-      alert('✅ Заказ успешно отправлен на почту!');
-      localStorage.removeItem('cart');
-      window.location.href = 'index.html';
-    })
-    .catch((err) => {
-      console.error("Полная ошибка EmailJS:", err);
-      alert('❌ Ошибка ' + (err.status || 400) + '\nПодробности в консоли (F12)');
-    })
-    .finally(() => {
-      placeBtn.disabled = false;
-      placeBtn.textContent = 'Подтвердить заказ';
-    });
+    message: orderDetails
+  })
+  .then(() => {
+    alert('✅ Заказ успешно отправлен!');
+    localStorage.removeItem('cart');
+    window.location.href = 'index.html';
+  })
+  .catch((err) => {
+    console.error("Полная ошибка:", err);
+    alert('Ошибка: ' + (err.text || err.status || 'Неизвестная'));
+  })
+  .finally(() => {
+    placeBtn.disabled = false;
+    placeBtn.textContent = 'Подтвердить заказ';
+  });
 }
 
 renderOrderSummary();
