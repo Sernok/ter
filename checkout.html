@@ -298,11 +298,14 @@
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 emailjs.init('8KPENbHiyHjeOZQU');
+
 const cart = JSON.parse(localStorage.getItem('cart')) || [];
 const summaryContainer = document.getElementById('order-summary');
 const placeBtn = document.getElementById('place-order-btn');
+
 function renderOrderSummary() {
   if (cart.length === 0) {
     summaryContainer.innerHTML = '<p>Корзина пуста</p>';
@@ -315,22 +318,27 @@ function renderOrderSummary() {
     total += itemTotal;
     html += `<p>${item.name} × ${item.quantity} = <strong>$${itemTotal}</strong></p>`;
   });
-  html += `<hr><h3>Итого: $${total}</h3>`;
+  html += `<hr><h3 style="color:#00ff41;">Итого: $${total}</h3>`;
   summaryContainer.innerHTML = html;
   return total;
 }
+
 function placeOrder() {
   if (cart.length === 0) return alert('Корзина пуста');
+
   const form = document.getElementById('checkout-form');
   const formData = new FormData(form);
   const total = renderOrderSummary();
+
   let orderDetails = '';
   cart.forEach(item => {
     orderDetails += `- ${item.name} × ${item.quantity} шт. = $${item.price * item.quantity}\n`;
   });
+
   placeBtn.disabled = true;
   placeBtn.textContent = 'Отправляем...';
-  emailjs.send('service_i4q84st', 'template_ga0qo5w', {
+
+  const templateParams = {
     from_name: formData.get('from_name'),
     from_email: formData.get('from_email'),
     phone: formData.get('phone') || 'Не указан',
@@ -339,21 +347,26 @@ function placeOrder() {
     total: total,
     site_name: 'Мой Магазин',
     date: new Date().toLocaleString('ru-RU')
-  })
-  .then(() => {
-    alert('✅ Заказ успешно отправлен на почту!');
-    localStorage.removeItem('cart');
-    window.location.href = 'index.html';
-  })
-  .catch((err) => {
-    console.error('EmailJS Error:', err);
-    alert('❌ Ошибка отправки. Проверьте консоль (F12).');
-  })
-  .finally(() => {
-    placeBtn.disabled = false;
-    placeBtn.textContent = 'Подтвердить заказ';
-  });
+  };
+
+  console.log("Отправляем данные:", templateParams); // Для отладки
+
+  emailjs.send('service_i4q84st', 'template_ga0qo5w', templateParams)
+    .then(() => {
+      alert('✅ Заказ успешно отправлен на почту!');
+      localStorage.removeItem('cart');
+      window.location.href = 'index.html';
+    })
+    .catch((err) => {
+      console.error("Полная ошибка EmailJS:", err);
+      alert('❌ Ошибка ' + (err.status || 400) + '\nПодробности в консоли (F12)');
+    })
+    .finally(() => {
+      placeBtn.disabled = false;
+      placeBtn.textContent = 'Подтвердить заказ';
+    });
 }
+
 renderOrderSummary();
 </script>
             </div>
